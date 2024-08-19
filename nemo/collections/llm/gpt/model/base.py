@@ -129,10 +129,12 @@ class GPTConfig(TransformerConfig, io.IOMixin):
             ) % vp_size == 0, "Make sure the number of model chunks is the same across all pipeline stages."
 
         if self.enable_tensor_parallel_overlap:
-            if self.tensor_model_parallel_size < 2 \
-                or not self.sequence_parallel \
-                or not HAVE_TE \
-                or not transformer_engine.pytorch.cpp_extensions.userbuf_comm_available():
+            if (
+                self.tensor_model_parallel_size < 2
+                or not self.sequence_parallel
+                or not HAVE_TE
+                or not transformer_engine.pytorch.cpp_extensions.userbuf_comm_available()
+            ):
                 logging.info("Disabling tensor parallel overlap due to incompatible setup.")
                 self.enable_tensor_parallel_overlap = False
 
