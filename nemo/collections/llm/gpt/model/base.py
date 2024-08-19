@@ -13,6 +13,7 @@ from nemo.collections.llm import fn
 from nemo.lightning import get_vocab_size, io
 from nemo.lightning.megatron_parallel import MaskedTokenLossReduction
 from nemo.lightning.pytorch.optim import MegatronOptimizerModule, OptimizerModule
+from nemo.utils import logging
 
 HAVE_TE = True
 try:
@@ -115,8 +116,11 @@ class GPTConfig(TransformerConfig, io.IOMixin):
     transformer_layer_spec: Union[ModuleSpec, Callable[["GPTConfig"], ModuleSpec]] = default_layer_spec
     forward_step_fn: Callable = gpt_forward_step
     data_step_fn: Callable = gpt_data_step
+    enable_tensor_parallel_overlap: bool = False
+    tensor_parallel_overlap_config: dict = None
 
     def configure_model(self, tokenizer) -> "MCoreGPTModel":
+
         vp_size = self.virtual_pipeline_model_parallel_size
         if vp_size:
             p_size = self.pipeline_model_parallel_size
@@ -124,13 +128,20 @@ class GPTConfig(TransformerConfig, io.IOMixin):
                 self.num_layers // p_size
             ) % vp_size == 0, "Make sure the number of model chunks is the same across all pipeline stages."
 
+        if self.enable_tensor_parallel_overlap:
+            if self.tensor_model_parallel_size < 2 \
+                or not self.sequence_parallel \
+                or not HAVE_TE \
+                or not transformer_engine.pytorch.cpp_extensions.userbuf_comm_available():
+                logging.info("Disabling tensor parallel overlap due to incompatible setup.")
+                self.enable_tensor_parallel_overlap = False
+
         from megatron.core import parallel_state
         from megatron.core.models.gpt.gpt_model import GPTModel as MCoreGPTModel
 
         transformer_layer_spec = self.transformer_layer_spec
         if not isinstance(transformer_layer_spec, ModuleSpec):
             transformer_layer_spec = transformer_layer_spec(self)
-
         return MCoreGPTModel(
             self,
             transformer_layer_spec=transformer_layer_spec,
