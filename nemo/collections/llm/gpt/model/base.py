@@ -109,6 +109,7 @@ class GPTConfig(TransformerConfig, io.IOMixin):
     attention_softmax_in_fp32: bool = False
     masked_softmax_fusion: bool = True
     deallocate_pipeline_outputs = True
+    tp_comm_overlap_cfg: dict = None
 
     # TODO: Move this to better places?
     get_attention_mask_from_fusion: bool = False
@@ -116,8 +117,7 @@ class GPTConfig(TransformerConfig, io.IOMixin):
     transformer_layer_spec: Union[ModuleSpec, Callable[["GPTConfig"], ModuleSpec]] = default_layer_spec
     forward_step_fn: Callable = gpt_forward_step
     data_step_fn: Callable = gpt_data_step
-    enable_tensor_parallel_overlap: bool = False
-    tensor_parallel_overlap_config: dict = None
+
 
     def configure_model(self, tokenizer) -> "MCoreGPTModel":
 
@@ -128,7 +128,7 @@ class GPTConfig(TransformerConfig, io.IOMixin):
                 self.num_layers // p_size
             ) % vp_size == 0, "Make sure the number of model chunks is the same across all pipeline stages."
 
-        if self.enable_tensor_parallel_overlap:
+        if self.tp_comm_overlap:
             if (
                 self.tensor_model_parallel_size < 2
                 or not self.sequence_parallel
@@ -136,7 +136,7 @@ class GPTConfig(TransformerConfig, io.IOMixin):
                 or not transformer_engine.pytorch.cpp_extensions.userbuf_comm_available()
             ):
                 logging.info("Disabling tensor parallel overlap due to incompatible setup.")
-                self.enable_tensor_parallel_overlap = False
+                self.tp_comm_overlap = False
 
         from megatron.core import parallel_state
         from megatron.core.models.gpt.gpt_model import GPTModel as MCoreGPTModel
