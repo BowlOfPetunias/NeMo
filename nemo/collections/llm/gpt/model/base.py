@@ -131,7 +131,7 @@ class GPTConfig(TransformerConfig, io.IOMixin):
         transformer_layer_spec = self.transformer_layer_spec
         if not isinstance(transformer_layer_spec, ModuleSpec):
             transformer_layer_spec = transformer_layer_spec(self)
-            
+
         return MCoreGPTModel(
             self,
             transformer_layer_spec=transformer_layer_spec,
