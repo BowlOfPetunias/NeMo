@@ -13,7 +13,6 @@ from nemo.collections.llm import fn
 from nemo.lightning import get_vocab_size, io
 from nemo.lightning.megatron_parallel import MaskedTokenLossReduction
 from nemo.lightning.pytorch.optim import MegatronOptimizerModule, OptimizerModule
-from nemo.utils import logging
 
 HAVE_TE = True
 try:
@@ -119,7 +118,6 @@ class GPTConfig(TransformerConfig, io.IOMixin):
     data_step_fn: Callable = gpt_data_step
 
     def configure_model(self, tokenizer) -> "MCoreGPTModel":
-
         vp_size = self.virtual_pipeline_model_parallel_size
         if vp_size:
             p_size = self.pipeline_model_parallel_size
@@ -133,6 +131,7 @@ class GPTConfig(TransformerConfig, io.IOMixin):
         transformer_layer_spec = self.transformer_layer_spec
         if not isinstance(transformer_layer_spec, ModuleSpec):
             transformer_layer_spec = transformer_layer_spec(self)
+            
         return MCoreGPTModel(
             self,
             transformer_layer_spec=transformer_layer_spec,
