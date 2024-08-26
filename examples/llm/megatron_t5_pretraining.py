@@ -2,12 +2,11 @@
 ## There are no guarantees that this script is up-to-date with latest NeMo.
 
 import argparse
-
-from megatron.core.optimizer import OptimizerConfig
-from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.loggers import WandbLogger
-import torch
 import os
+
+import torch
+from megatron.core.optimizer import OptimizerConfig
+from pytorch_lightning.loggers import TensorBoardLogger, WandbLogger
 
 from nemo import lightning as nl
 from nemo.collections import llm
@@ -16,8 +15,9 @@ from nemo.collections.llm.t5.data import PreTrainingDataModule
 from nemo.collections.nlp.modules.common.tokenizer_utils import get_nmt_tokenizer
 from nemo.lightning import NeMoLogger
 from nemo.lightning.pytorch.callbacks import ModelCheckpoint
-from nemo.lightning.pytorch.optim.megatron import MegatronOptimizerModule
 from nemo.lightning.pytorch.optim.lr_scheduler import WarmupAnnealingScheduler
+from nemo.lightning.pytorch.optim.megatron import MegatronOptimizerModule
+
 
 def get_args():
     parser = argparse.ArgumentParser(description='Train a small T5 model using NeMo 2.0')
@@ -43,11 +43,7 @@ if __name__ == '__main__':
         vocab_file=args.vocab_path,
     )
     # DEBUGGING
-    additional_tokens = {
-        'additional_special_tokens': [
-            f'<extra_id_{i}>' for i in range(100)
-        ]
-    }
+    additional_tokens = {'additional_special_tokens': [f'<extra_id_{i}>' for i in range(100)]}
     tokenizer.add_special_tokens(additional_tokens)
 
     data = PreTrainingDataModule(
@@ -108,8 +104,7 @@ if __name__ == '__main__':
     opt = MegatronOptimizerModule(
         config=opt_config,
         lr_scheduler=lr_scheduler,
-        )
-
+    )
 
     trainer = nl.Trainer(
         devices=args.devices,

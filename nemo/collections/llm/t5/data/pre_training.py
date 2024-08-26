@@ -48,13 +48,13 @@ class PreTrainingDataModule(pl.LightningDataModule, IOMixin):
         num_workers (int): See ``torch.utils.data.DataLoader`` documentation.
         pin_memory (bool): See ``torch.utils.data.DataLoader`` documentation.
         persistent_workers (bool): See ``torch.utils.data.DataLoader`` documentation.
-        masking_probability (float): 
-        short_sequence_probability (float): 
-        masking_max_ngram (int): 
-        masking_do_full_word (bool): 
-        masking_do_permutation (bool): 
-        masking_use_longer_ngrams (bool): 
-        masking_use_geometric_distribution (bool): 
+        masking_probability (float):
+        short_sequence_probability (float):
+        masking_max_ngram (int):
+        masking_do_full_word (bool):
+        masking_do_permutation (bool):
+        masking_use_longer_ngrams (bool):
+        masking_use_geometric_distribution (bool):
         seed (int): Seed for generating the T5 dataset.
         split (str): A string of 3 comma-separated integers denoting how much of the distribution
             to allocate to train, validation, and test sets, respectively. Unused if ``paths`` is a dict.
@@ -226,13 +226,13 @@ class PreTrainingDataModule(pl.LightningDataModule, IOMixin):
             sequence_length_decoder=self.seq_length_dec,
             tokenizer=self.tokenizer,
             path_to_cache=self.index_mapping_dir,
-            masking_probability = self.masking_probability,
-            short_sequence_probability = self.short_sequence_probability,
-            masking_max_ngram = self.masking_max_ngram,
-            masking_do_full_word = self.masking_do_full_word,
-            masking_do_permutation = self.masking_do_permutation,
-            masking_use_longer_ngrams = self.masking_use_longer_ngrams,
-            masking_use_geometric_distribution = self.masking_use_geometric_distribution,
+            masking_probability=self.masking_probability,
+            short_sequence_probability=self.short_sequence_probability,
+            masking_max_ngram=self.masking_max_ngram,
+            masking_do_full_word=self.masking_do_full_word,
+            masking_do_permutation=self.masking_do_permutation,
+            masking_use_longer_ngrams=self.masking_use_longer_ngrams,
+            masking_use_geometric_distribution=self.masking_use_geometric_distribution,
             **self.build_kwargs,
         )
 
