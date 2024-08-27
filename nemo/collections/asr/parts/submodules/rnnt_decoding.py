@@ -846,6 +846,9 @@ class AbstractRNNTDecoding(ConfidenceMixin):
         if hypothesis.timestep is not None and len(hypothesis.timestep) > 0:
             start_index = max(0, hypothesis.timestep[0] - 1)
 
+        if isinstance(start_index, torch.Tensor):
+            start_index = start_index.cpu().numpy()
+
         # Construct the start and end indices brackets
         end_indices = np.asarray(token_repetitions).cumsum()
         start_indices = np.concatenate(([start_index], end_indices[:-1]))
